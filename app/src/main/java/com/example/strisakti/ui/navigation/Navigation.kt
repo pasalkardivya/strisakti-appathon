@@ -12,7 +12,8 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     val navController = rememberNavController()
     NavHost(navController, "home") {
         composable("home") {
-            HomeScreen(modifier)
+            HomeScreen(modifier, navController)
         }
+        composable("newUpdates") {  }
     }
 }

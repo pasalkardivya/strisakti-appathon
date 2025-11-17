@@ -20,17 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
     val options = listOf(
-        "New Updates",
-        "Start for Women",
-        "Law for Women",
-        "Advantages for Women",
-        " periods date treak",
-        "chat with online"
+        MenuOption("New Updates", "new_updates"),
+        MenuOption("Start for Women", "start_for_women"),
+        MenuOption("Law for Women", "law_for_women"),
+        MenuOption("Advantages for Women", "advantages_for_women"),
+        MenuOption("Periods Date Track", "periods_track"),
+        MenuOption("Chat With Online", "chat_online")
     )
+
     Column(
         modifier
     ) {
@@ -40,7 +42,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .padding(10.dp)
                         .size(180.dp)              // Square 180dp
-                        .clickable { /* TODO: handle click */ },
+                        .clickable { navController.navigate(option.route) },
                     shape = RoundedCornerShape(12.dp),
                     elevation = CardDefaults.cardElevation(8.dp)
                 ) {
@@ -49,7 +51,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = option,
+                            text = option.displayText,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold
                         )
@@ -60,3 +62,8 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
     }
 }
+
+data class MenuOption(
+    val displayText: String,
+    val route: String
+)
