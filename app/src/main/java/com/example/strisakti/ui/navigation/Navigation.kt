@@ -10,7 +10,7 @@ import com.example.strisakti.ui.screen.HomeScreen
 import com.example.strisakti.ui.screen.LawForWomen
 import com.example.strisakti.ui.screen.NewUpdatesScreen
 import com.example.strisakti.ui.screen.PeriodsDateTreak
-import com.example.strisakti.ui.screen.StartForWomenScreen
+import com.example.strisakti.ui.screen.StartForWomens
 
 @Composable
 fun AppNavigation(modifier: Modifier = Modifier) {
@@ -23,7 +23,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             NewUpdatesScreen(modifier, navController)
         }
         composable(route = "start_for_women") {
-            StartForWomenScreen(modifier, navController )
+            StartForWomens (modifier, navController )
 
         }
         composable(route = "advantages_for_women"){

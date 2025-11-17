@@ -1,86 +1,1661 @@
 package com.example.strisakti.ui.screen
 
-
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.font.FontWeight
 import androidx.navigation.NavController
 
-data class WomenScheme(
-    val title: String,
-    val description: String
-)
+// DATA
+import com.example.strisakti.data.safety.SafetyLocation
+import com.example.strisakti.data.safety.MedicalLocation
+import com.example.strisakti.data.safety.WomenEmergencyContact
+import com.example.strisakti.data.safety.SafetyDataProvider
 
+// UI COMPONENTS
+import com.example.strisakti.ui.components.SafetyLocationCard
+import com.example.strisakti.ui.components.MedicalLocationCard
+import com.example.strisakti.ui.components.WomenContactCard
+
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StartForWomenScreen(modifier: Modifier, navController: NavController) {
+fun StartForWomens(modifier: Modifier = Modifier, navController: NavController) {
 
-    val schemes = listOf(
-        WomenScheme(
-            "Mudra Loan for Women",
-            "Government provides ₹50,000 to ₹10 lakh loan for women starting small businesses."
-        ),
-        WomenScheme(
-            "Udyam Sakhi Portal",
-            "A platform that helps women learn business skills and connect with resources."
-        ),
-        WomenScheme(
-            "Stand-Up India",
-            "Bank loans between ₹10 lakh to ₹1 crore for women entrepreneurs."
-        ),
-        WomenScheme(
-            "Mahila Shakti Kendra",
-            "Skill development + support for rural women to start working."
-        )
-    )
+    var safetyLocations by remember { mutableStateOf<List<SafetyLocation>>(emptyList()) }
+    var medicalLocations by remember { mutableStateOf<List<MedicalLocation>>(emptyList()) }
+    var womenContacts by remember { mutableStateOf<List<WomenEmergencyContact>>(emptyList()) }
+    var isLoading by remember { mutableStateOf(true) }
+    var activeTab by remember { mutableStateOf(0) } // 0: Safety, 1: Medical, 2: Women Contacts
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
+    // LOAD MOCK DATA
+    LaunchedEffect(Unit) {
+        try {
+            // Use local mock data directly - no API calls to avoid crashes
+            safetyLocations = SafetyDataProvider.lavasaSafetyPoints
+            medicalLocations = SafetyDataProvider.medicalEmergencyLocations
+            womenContacts = SafetyDataProvider.womenEmergencyContacts
+        } catch (e: Exception) {
+            e.printStackTrace()
+        } finally {
+            isLoading = false
+        }
+    }
 
-        Text(
-            text = "Start For Women",
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold
-        )
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Women Safety – Lavasa") }
+            )
+        }
+    ) { innerPadding ->
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
 
-        LazyColumn {
-            items(schemes) { scheme ->
-                WomenSchemeCard(scheme)
+            // TAB BUTTONS
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Button(
+                    onClick = { activeTab = 0 },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(2.dp)
+                ) {
+                    Text("Safety")
+                }
+                Button(
+                    onClick = { activeTab = 1 },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(2.dp)
+                ) {
+                    Text("Medical")
+                }
+                Button(
+                    onClick = { activeTab = 2 },
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(2.dp)
+                ) {
+                    Text("Contacts")
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+
+            // LOADING STATE
+            if (isLoading) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                // CONTENT BASED ON TAB
+                when (activeTab) {
+                    0 -> {
+                        // SAFETY LOCATIONS
+                        if (safetyLocations.isEmpty()) {
+                            Text(
+                                "No safety locations found.",
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxSize()
+                            ) {
+                                items(safetyLocations) { location ->
+                                    SafetyLocationCard(location)
+                                }
+                            }
+                        }
+                    }
+
+                    1 -> {
+                        // MEDICAL LOCATIONS
+                        if (medicalLocations.isEmpty()) {
+                            Text(
+                                "No medical emergencies found.",
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxSize()
+                            ) {
+                                items(medicalLocations) { location ->
+                                    MedicalLocationCard(location)
+                                }
+                            }
+                        }
+                    }
+
+                    2 -> {
+                        // WOMEN EMERGENCY CONTACTS
+                        if (womenContacts.isEmpty()) {
+                            Text(
+                                "No women emergency contacts available.",
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .fillMaxSize()
+                            ) {
+                                items(womenContacts) { contact ->
+                                    WomenContactCard(contact)
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 }
 
-@Composable
-fun WomenSchemeCard(item: WomenScheme) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        elevation = CardDefaults.cardElevation(6.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
 
-            Text(
-                text = item.title,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
-            )
 
-            Spacer(modifier = Modifier.height(6.dp))
 
-            Text(text = item.description)
-        }
-    }
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
