@@ -30,12 +30,13 @@ fun HomeScreen(modifier: Modifier = Modifier, navController: NavController) {
         MenuOption("Law for Women", "law_for_women"),
         MenuOption("Advantages for Women", "advantages_for_women"),
         MenuOption("Periods Date Track", "periods_track"),
-        MenuOption("Chat With Online", "chat_online")
+
     )
 
     Column(
         modifier
-    ) {
+    )
+    {
         LazyVerticalGrid(columns = GridCells.Adaptive(200.dp)) {
             items(options) { option ->
                 Card(
